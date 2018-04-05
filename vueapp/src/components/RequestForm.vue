@@ -23,10 +23,14 @@
                 </md-field>
                 </md-tab>
                 <md-tab md-label="Observations">
-                        <md-table :value="observations" md-card @md-selected="onSelect">
+                    <md-table :value="filteredObs" md-card @md-selected="onSelect">
                         <!--<md-table-toolbar>
                         <h1 class="md-title"></h1>
                         </md-table-toolbar>-->
+                        <md-table-empty-state md-label="No observations found" :md-description="`No observations found.`">
+                            <md-button class="md-primary md-raised" @click="newObservation">Create New Observation</md-button>
+                        </md-table-empty-state>
+
                         <md-table-row slot="md-table-row" slot-scope="{ item }" md-selectable="single">
                             <md-table-cell md-label="ID" md-sort-by="id" md-numeric>{{ item.Id }}</md-table-cell>
                             <md-table-cell md-label="Reference" md-sort-by="REFERENCE">{{ item.REFERENCE }}</md-table-cell>
@@ -34,12 +38,12 @@
                             <md-table-cell md-label="Response" md-sort-by="RESPONSE">{{ item.RESPONSE }}</md-table-cell>
                             <md-table-cell md-label="Reviewer" md-sort-by="REVIEWER">{{ item.REVIEWER }}</md-table-cell>
                         </md-table-row>
-                        </md-table>
+                    </md-table>
                 </md-tab>
 
             </md-tabs>
             <md-dialog-actions>
-                <md-button class="md-primary" @click="$emit('update:showReqform', false)">Close</md-button>
+                <md-button class="md-primary" @click="closeForm">Close</md-button>
                 <md-button class="md-primary" @click="postData">Save</md-button>
             </md-dialog-actions>
         </md-dialog>
@@ -56,14 +60,21 @@ export default {
     },
     props: ['showReqform','reference', 'requester', 'comments', 'observations', 'Id'],
     methods: {
+        closeForm: function(){
+            this.$emit('update:showReqform', false);
+            this.$emit('update:select', 0);
+        },
+        newObservation: function(){
+            //function
+        },
         postData: function(){
             this.progress=true;
             console.log(this.Id, this.reference, this.requester, this.comments);
             this.$http.post(
-                "http://hon.local/insert.php", {'mode':"add",'reference':this.reference, 'requester':this.requester, 'comments':this.comments}
+                "insert.php", {'mode':"add",'reference':this.reference, 'requester':this.requester, 'comments':this.comments}
             )
             .then(
-                status => {
+                function(status){
                     if(status.data = 'Data Inserted...'){
                         this.$emit('update:showReqform', false);
                         this.$parent.refresh();
@@ -75,5 +86,12 @@ export default {
 
         }
     },
+    computed:{
+        filteredObs: function(reference){
+            return this.observations.filter((observation) => {
+                return observation.REFERENCE.match(this.reference)
+            });
+        }
+    }
 }
 </script>

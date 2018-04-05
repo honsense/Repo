@@ -9,17 +9,11 @@
 
 <script>
 
-import test from './components/test'
-import sourceSelection from './components/sourceSelection'
-import newsList from './components/newsList'
 import tableTemplate from './components/tableTemplate'
 
 export default {
   name: 'App',
   components:{
-    test,
-    sourceSelection,
-    newsList,
     tableTemplate,
   },
 
