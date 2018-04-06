@@ -22,7 +22,7 @@
                 </md-field>
                 </md-tab>
                 <md-tab md-label="Observations">
-                    <md-table :value="filteredObs" md-card @md-selected="onSelect">
+                    <md-table :value="filteredObs" md-card @md-selected="onSelect" md-fixed-header>
                         <!--<md-table-toolbar>
                         <h1 class="md-title"></h1>
                         </md-table-toolbar>-->
@@ -31,9 +31,10 @@
                         </md-table-empty-state>
 
                         <md-table-row slot="md-table-row" slot-scope="{ item }" md-selectable="single">
-                            <md-table-cell md-label="ID" md-sort-by="id" md-numeric>{{ item.Id }}</md-table-cell>
+                            <!-- <md-table-cell md-label="ID" md-sort-by="id" md-numeric>{{ item.Id }}</md-table-cell> -->
                             <md-table-cell md-label="Reference" md-sort-by="REFERENCE">{{ item.REFERENCE }}</md-table-cell>
-                            <md-table-cell md-label="Action" md-sort-by="ACTION">{{ item.ACTION }}</md-table-cell>
+                            <md-table-cell md-label="Observation" md-sort-by="ACTION">{{ item.OBSERVATION }}</md-table-cell>
+                            <md-table-cell md-label="Action" md-sort-by="ACTION">{{ item.ACTIONS }}</md-table-cell>
                             <md-table-cell md-label="Response" md-sort-by="RESPONSE">{{ item.RESPONSE }}</md-table-cell>
                             <md-table-cell md-label="Reviewer" md-sort-by="REVIEWER">{{ item.REVIEWER }}</md-table-cell>
                         </md-table-row>

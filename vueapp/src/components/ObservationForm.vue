@@ -1,32 +1,36 @@
 <template>
     <div>
         <md-dialog :md-active="showObsform" class="Obsform">
-            <md-dialog-title>Request Info</md-dialog-title>
+            <md-dialog-title>Observation</md-dialog-title>
             <div>
                 <md-progress-bar md-mode="indeterminate" v-show="progress"></md-progress-bar>
             </div>
 
             <form nonvalidate @submit.prevent="validateUser">
                 <md-card >
-                    <md-field :class="getValidationClass('reference')">
+                    <md-field>
                         <label for="reference">Reference</label>
-                        <md-input name="reference" id="reference" v-model="form.reference"></md-input>
+                        <md-input name="reference" id="reference" :value="reference" disabled></md-input>
                     </md-field>
                     <md-field :class="getValidationClass('requester')">
                         <label for="requester">Requester</label>
                         <md-input name="requester" id="requester" v-model="form.requester"></md-input>
+                        <span class="md-error" v-if="!$v.form.requester.required">This field is required</span>
                     </md-field>
                     <md-field :class="getValidationClass('observation')">
                         <label for="observation">Observation</label>
                         <md-textarea name="observation" id="observation" v-model="form.observation" md-autogrow></md-textarea>
+                        <span class="md-error" v-if="!$v.form.observation.required">This field is required</span>
+
                     </md-field>
                     <md-field :class="getValidationClass('action')">
                         <label for="action">Action</label>
-                        <md-textarea name="action" id="action" v-model="form.action" @input="getValidationClass('action')" md-autogrow></md-textarea><!--resulme here-->
-                        <span class="md-error" v-if="!$v.form.action.required"></span>
+                        <md-textarea name="action" id="action" v-model="form.action" md-autogrow></md-textarea><!--resulme here-->
+                        <span class="md-error" v-if="!$v.form.action.required">This field is required</span>
                     </md-field>
 
                     <md-card-actions>
+                        <md-button @click="closeForm" class="md-primary">Close</md-button>
                         <md-button type="submit" class="md-primary">Submit</md-button>
                     </md-card-actions>
                 </md-card>
@@ -52,7 +56,6 @@ export default {
     data() {
         return {
             form: {
-                reference: null,
                 requester: null,
                 observation: null,
                 action: null
@@ -64,9 +67,6 @@ export default {
     props: ['showObsform','reference', 'requester', 'comments', 'observations', 'Id', 'mode'],
     validations: {
         form: {
-            reference: {
-                required
-            },
             requester: {
                 required
             },
@@ -89,32 +89,38 @@ export default {
                 }
             }
         },
-        saveUser() {
-            this.sending = true
-        },
         validateUser() {
             this.$v.$touch()
 
             if (!this.$v.$invalid) {
-                this.saveUser()
-            }
-        },
-        test: function(){
-            if(this.$v.form[action].$dirty) {
-                console.log('dirt');
-            }
-            else {
-                console.log('no dirt');
+                this.postData()
             }
         },
         closeForm: function (){
-            this.$emit('update:showObsform', false);
-            this.$emit('update:showReqform', true);
+            console.log(this.reference)
+            this.$v.$reset()
+            this.form.requester = null;
+            this.form.observation = null;
+            this.form.action = null;
+            //this.$emit('update:showObsform', false);
+            //this.$emit('update:showReqform', true);
         },
         postData: function() {
-            ///
+            this.progress=true;
+            this.$http.post(
+                "http://hon.local/obsinsert.php", {'Id':this.Id, 'mode':this.mode,'reference':this.reference, 'observation':this.form.observation, 'action':this.form.action}
+            )
+            .then(
+                function(status){
+                    if(status.data = 'Data Inserted...'){
+                        // this.$emit('update:showObsform', false);
+                        this.$parent.refresh(1);
+                    }
+                this.progress=false;
+            });
+            this.closeForm();
         }
-    }
+    },
 }
 </script>
 

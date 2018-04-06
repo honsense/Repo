@@ -26,7 +26,7 @@
             </md-table-row>
         </md-table>
         <RequestForm :showObsform.sync="showObsform" :showReqform.sync="showReqform" :Id.sync="Id" :reference.sync="reference" :requester.sync="requester" :comments.sync="comments" :observations="observations" :mode="mode"></RequestForm>
-        <ObservationForm :showObsform.sync="showObsform" :showReqform.sync="showReqform"></ObservationForm>
+        <ObservationForm :showObsform.sync="showObsform" :showReqform.sync="showReqform" :reference.sync="reference"></ObservationForm>
     </div>
 </template>
 
@@ -88,7 +88,7 @@ export default {
             this.Id = '';
             this.mode = 'insert';
         },
-        refresh: function () {
+        refresh: function (obs) {
             this.$http.get('http://hon.local/select.php')
             .then(function(response){
             this.sources = response.body;
@@ -100,6 +100,10 @@ export default {
             this.observations = response.body;
             this.progress=false
             })
+            if(obs) {
+                this.showObsform = false;
+                this.showReqform = true;
+            }
         }
     },
     created: function () {
