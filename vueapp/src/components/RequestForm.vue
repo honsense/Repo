@@ -6,7 +6,6 @@
                 <md-progress-bar md-mode="indeterminate" v-show="progress"></md-progress-bar>
             </div>
 
-
             <md-tabs md-dynamic-height>
                 <md-tab md-label="Request">
                 <md-field>
@@ -58,28 +57,31 @@ export default {
             progress:false
         }
     },
-    props: ['showReqform','reference', 'requester', 'comments', 'observations', 'Id'],
+    props: ['showObsform', 'showReqform','reference', 'requester', 'comments', 'observations', 'Id', 'mode'],
     methods: {
         closeForm: function(){
             this.$emit('update:showReqform', false);
-            this.$emit('update:select', 0);
+            //this.$emit('update:select', 0);
         },
         newObservation: function(){
-            //function
+            this.$emit('update:showObsform', true);
+            this.$emit('update:showReqform', false);
         },
         postData: function(){
             this.progress=true;
-            console.log(this.Id, this.reference, this.requester, this.comments);
+            console.log(this.Id, this.reference, this.requester, this.comments, this.mode);
             this.$http.post(
-                "insert.php", {'mode':"add",'reference':this.reference, 'requester':this.requester, 'comments':this.comments}
+                "http://hon.local/insert.php", {'Id':this.Id, 'mode':this.mode,'reference':this.reference, 'requester':this.requester, 'comments':this.comments}
             )
             .then(
                 function(status){
                     if(status.data = 'Data Inserted...'){
                         this.$emit('update:showReqform', false);
                         this.$parent.refresh();
+                        this.$emit('update:search', null)
                     }
                 this.progress=false;
+                console.log(status);
             });
         },
         onSelect: function(){
@@ -89,7 +91,7 @@ export default {
     computed:{
         filteredObs: function(reference){
             return this.observations.filter((observation) => {
-                return observation.REFERENCE.match(this.reference)
+                return observation.REQUEST_ID == this.Id
             });
         }
     }

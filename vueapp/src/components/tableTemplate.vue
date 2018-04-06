@@ -1,13 +1,13 @@
 <template>
     <div id="app">
-        <md-table v-model="filteredItems" md-card md-sort="name" md-sort-order="asc" @md-selected="onSelect">
+        <md-table v-model="searched" md-card md-sort="name" md-sort-order="asc" @md-selected="onSelect">
             <md-table-toolbar>
                 <h1 class="md-title">Review Requests</h1>
                     <div class="md-toolbar-section-start">
                     </div>
 
                 <md-field md-clearable class="md-toolbar-section-end">
-                    <md-input placeholder="Enter your reference" v-model="search"/>
+                    <md-input placeholder="Enter your reference" v-model="search" @input="searchUpdate"/>
                 </md-field>
             </md-table-toolbar>
             <div>
@@ -25,17 +25,31 @@
                 <md-table-cell md-label="Date Requested" md-sort-by="DATE_REQUESTED">{{ item.DATE_REQUESTED }}</md-table-cell>
             </md-table-row>
         </md-table>
-        <RequestForm :showReqform.sync="showReqform" :Id="Id" :reference.sync="reference" :requester.sync="requester" :comments.sync="comments" :observations="observations"></RequestForm>
+        <RequestForm :showObsform.sync="showObsform" :showReqform.sync="showReqform" :Id.sync="Id" :reference.sync="reference" :requester.sync="requester" :comments.sync="comments" :observations="observations" :mode="mode"></RequestForm>
+        <ObservationForm :showObsform.sync="showObsform" :showReqform.sync="showReqform"></ObservationForm>
     </div>
 </template>
 
 <script>
-import RequestForm from '../components/RequestForm'
+import RequestForm from '@/components/RequestForm'
+import ObservationForm from '@/components/ObservationForm'
+
+const toLower = text => {
+    return text.toString().toLowerCase()
+}
+
+const searchByRef = (items, term) => {
+    if (term) {
+        return items.filter(item => toLower(item.REFERENCE).includes(toLower(term)))
+    }
+    return items
+}
 
 export default {
     name: 'sourceSelection',
     components:{
-        RequestForm
+        RequestForm,
+        ObservationForm
     },
     data() {
         return{
@@ -43,34 +57,45 @@ export default {
             observations: [],
             source: '',
             showReqform: false,
+            showObsform: false,
             reference: '',
             requester: '',
             comments: '',
             Id: '',
             progress: true,
-            search: ''
+            search: null,
+            searched: [],
+            mode: ''
         }
     },
     methods: {
+        searchUpdate: function() {
+            this.searched = searchByRef(this.sources, this.search);
+        },
         onSelect: function(item){
             this.showReqform = true;
             this.Id = item.Id;
             this.reference = item.REFERENCE;
             this.requester = item.REQUESTER;
             this.comments = item.COMMENTS;
+            this.mode = 'update';
         },
         newRequest: function() {
             this.showReqform = true;
             this.reference = this.search;
             this.requester = '';
             this.comments = '';
+            this.Id = '';
+            this.mode = 'insert';
         },
         refresh: function () {
-            this.$http.get('select.php')
+            this.$http.get('http://hon.local/select.php')
             .then(function(response){
             this.sources = response.body;
+            this.searched = this.sources;
+            this.search = null;
             });
-            this.$http.get('obsselect.php')
+            this.$http.get('http://hon.local/obsselect.php')
             .then(function(response){
             this.observations = response.body;
             this.progress=false
@@ -78,11 +103,12 @@ export default {
         }
     },
     created: function () {
-        this.$http.get('select.php')
+        this.$http.get('http://hon.local/select.php')
         .then(function(response){
         this.sources = response.body;
+        this.searched = this.sources;
         });
-        this.$http.get('obsselect.php')
+        this.$http.get('http://hon.local/obsselect.php')
         .then(function(response){
         this.observations = response.body;
         this.progress=false;
@@ -106,5 +132,4 @@ export default {
             margin-right: 30px;
             margin-bottom: 60px;
         }
-
 </style>
